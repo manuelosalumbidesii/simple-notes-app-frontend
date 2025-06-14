@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Notes App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #fafafa;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 5px solid #4CAF50;
+    }
+
+    .form-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>📒 Simple Notes App</h1>
+
+    <ul id="notes-list"></ul>
+
+    <h2>Add Note</h2>
+    <div class="form-group">
+      <input id="title" type="text" placeholder="Title">
+      <input id="content" type="text" placeholder="Content">
+      <button onclick="addNote()">Add</button>
+    </div>
+  </div>
+
+<script>
+  function fetchNotes() {
+    fetch('/api/notes')
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('notes-list');
+        list.innerHTML = '';
+        data.forEach(note => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span>${note.title}: ${note.content}</span>
+              <button onclick="deleteNote('${note.id}')" style="background-color: #e74c3c; border: none; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      });
+  }
+
+  function addNote() {
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+
+    fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, content })
+    }).then(() => {
+      document.getElementById('title').value = '';
+      document.getElementById('content').value = '';
+      fetchNotes();
+    });
+  }
+
+  function deleteNote(id) {
+    fetch(`/api/notes/${id}`, {
+      method: 'DELETE'
+    }).then(() => fetchNotes());
+  }
+
+  fetchNotes();
+</script>
+
+
+</body>
+</html>
